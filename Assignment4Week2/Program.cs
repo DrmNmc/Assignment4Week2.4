@@ -1,85 +1,87 @@
 ﻿using System;
-using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace taskRace
+namespace Assignment10Ex4
 {
-    internal class Program
+    internal class Alarm { }
+    internal class Teeth { }
+    internal class Shower { }
+    internal class Dress { }
+    internal class Drive { }
+
+    class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            Console.WriteLine("Read, Set Go...");
-            int t1Location = 0;
-            int t2Location = 0;
-            int t3Location = 0;
-            int t4Location = 0;
-            int t5Location = 0;
-
-            // Creating Tasks
-            Task t1 = Task.Run(() =>
+            try
             {
-                Thread.CurrentThread.Name = "Speedy Gonzales";
-                for (int i = 0; i < 100; i++)
-                {
-                    if (t1Location < 100 && t2Location < 100 && t3Location < 100 && t4Location < 100 && t5Location < 100)
-                        MoveIt(ref t1Location);
-                }
-            });
+                Stopwatch sw = Stopwatch.StartNew();
+                TurnOffAlarm();
+                Console.WriteLine("Out of bed and ready to go");
 
-            Task t2 = Task.Run(() =>
+                BrushTeeth();
+                Console.WriteLine("Teeth are clean");
+
+                Shower shower = await TakeAShowerAsync();
+                Console.WriteLine("Showering is done");
+
+                GetDressed();
+                Console.WriteLine("Dressed and ready to go");
+
+                Drive drive = await DriveToWorkAsync(10);
+                Console.WriteLine("Walking into work.");
+
+                Console.WriteLine("Ready to begin");
+                sw.Stop();
+                Console.WriteLine("The program took " + sw.ElapsedMilliseconds + " milliseconds to run");
+            }
+            catch (InvalidOperationException ex)
             {
-                Thread.CurrentThread.Name = "Road Runner";
-                for (int i = 0; i < 100; i++)
-                {
-                    if (t1Location < 100 && t2Location < 100 && t3Location < 100 && t4Location < 100 && t5Location < 100)
-                        MoveIt(ref t2Location);
-                }
-            });
-
-            Task t3 = Task.Run(() =>
+                Console.WriteLine($"An exception has occurred: {ex.Message}");
+            }
+            catch (Exception ex)
             {
-                Thread.CurrentThread.Name = "The Flash";
-                for (int i = 0; i < 100; i++)
-                {
-                    if (t1Location < 100 && t2Location < 100 && t3Location < 100 && t4Location < 100 && t5Location < 100)
-                        MoveIt(ref t3Location);
-                }
-            });
-
-            Task t4 = Task.Run(() =>
-            {
-                Thread.CurrentThread.Name = "Sonic";
-                for (int i = 0; i < 100; i++)
-                {
-                    if (t1Location < 100 && t2Location < 100 && t3Location < 100 && t4Location < 100 && t5Location < 100)
-                        MoveIt(ref t4Location);
-                }
-            });
-
-            Task t5 = Task.Run(() =>
-            {
-                Thread.CurrentThread.Name = "Quicksilver";
-                for (int i = 0; i < 100; i++)
-                {
-                    if (t1Location < 100 && t2Location < 100 && t3Location < 100 && t4Location < 100 && t5Location < 100)
-                        MoveIt(ref t5Location);
-                }
-            });
-
-            Task.WaitAny(t1, t2, t3, t4, t5);
-
-            Console.WriteLine("Race has ended");
+                Console.WriteLine(ex.Message);
+            }
         }
 
-        static void MoveIt(ref int location)
+        static void TurnOffAlarm()
         {
-            location++;
-            Console.WriteLine($"{Thread.CurrentThread.Name} location={location}");
-            if (location >= 100)
+            Console.WriteLine("Turned off alarm");
+            return;
+        }
+
+
+        private static void BrushTeeth() => Console.WriteLine("Putting paste on the brush... Brushing");
+
+        private static async Task<Shower> TakeAShowerAsync()
+        {
+            Console.WriteLine("Warming the water...");
+            await Task.Delay(1000);
+            Console.WriteLine($"Shampoo and Condition the hair");
+            Console.WriteLine("Rinse off");
+            await Task.Delay(2000);
+            Console.WriteLine("Dry off");
+
+            //throw new InvalidOperationException("Error occurred, misplaced phone.");
+
+            return new Shower();
+        }
+
+
+        private static void GetDressed() => Console.WriteLine("Together and ready to go");
+
+        private static async Task<Drive> DriveToWorkAsync(int time)
+        {
+            Console.WriteLine("Starting the car...");
+            for (int i = 0; i < time; i++)
             {
-                Console.WriteLine($"{Thread.CurrentThread.Name} is the winner");
-                return;
+                Console.WriteLine($"Driving...");
             }
+            await Task.Delay(1000);
+            Console.WriteLine("Arrived at work");
+            return new Drive();
         }
     }
 }
